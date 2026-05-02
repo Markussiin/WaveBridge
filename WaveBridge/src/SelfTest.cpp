@@ -80,6 +80,14 @@ void testProtocol()
     const auto packets = packetizeFrame(AudioCodec::PcmS16, 1, nextSequence, 0, 240, payload, kAudioPacketHeaderSize + 2);
     expect(packets.size() == 3, "packet chunk count mismatch");
     expect(nextSequence == 3, "packet sequence counter mismatch");
+
+    const auto ping = makeControlPacket(PacketType::Ping, AudioCodec::PcmS16, 99, 1234, 240);
+    ParsedAudioPacket parsedPing;
+    expect(parseAudioPacket(ping.data(), ping.size(), parsedPing), "control packet parse failed");
+    expect(parsedPing.header.packetType == PacketType::Ping, "control packet type mismatch");
+    expect(parsedPing.header.streamId == 99, "control packet stream id mismatch");
+    expect(parsedPing.header.sequence == 1234, "control packet sequence mismatch");
+    expect(parsedPing.payloadLength == 0, "control packet should not have payload");
 }
 
 void testPcm()

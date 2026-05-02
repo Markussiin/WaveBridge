@@ -135,7 +135,11 @@ bool parseAudioPacket(const std::uint8_t* data, std::size_t size, ParsedAudioPac
     header.version = readU16(data + 4);
     header.headerSize = readU16(data + 6);
     header.packetType = static_cast<PacketType>(data[8]);
-    if (header.packetType != PacketType::Audio) {
+    if (header.packetType != PacketType::Audio
+        && header.packetType != PacketType::Start
+        && header.packetType != PacketType::Stop
+        && header.packetType != PacketType::Ping
+        && header.packetType != PacketType::Pong) {
         return false;
     }
     header.codec = static_cast<AudioCodec>(data[9]);
@@ -165,6 +169,26 @@ bool parseAudioPacket(const std::uint8_t* data, std::size_t size, ParsedAudioPac
     packet.payload = data + kAudioPacketHeaderSize;
     packet.payloadLength = header.payloadLength;
     return true;
+}
+
+Bytes makeControlPacket(PacketType type, AudioCodec codec, std::uint32_t streamId, std::uint64_t sequence, std::uint16_t frameSamples)
+{
+    if (type == PacketType::Audio) {
+        throw std::runtime_error("control packet type cannot be Audio");
+    }
+
+    AudioPacketHeader header;
+    header.packetType = type;
+    header.codec = codec;
+    header.streamId = streamId;
+    header.sequence = sequence;
+    header.sampleRate = kNetworkSampleRate;
+    header.channels = kNetworkChannels;
+    header.frameSamples = frameSamples;
+    header.chunkIndex = 0;
+    header.chunkCount = 1;
+    header.payloadLength = 0;
+    return serializeAudioPacket(header, nullptr, 0);
 }
 
 std::vector<Bytes> packetizeFrame(

@@ -63,6 +63,7 @@ bool parseCodecName(const std::string& name, AudioCodec& codec);
 
 Bytes serializeAudioPacket(const AudioPacketHeader& header, const std::uint8_t* payload, std::size_t payloadLength);
 bool parseAudioPacket(const std::uint8_t* data, std::size_t size, ParsedAudioPacket& packet);
+Bytes makeControlPacket(PacketType type, AudioCodec codec, std::uint32_t streamId, std::uint64_t sequence, std::uint16_t frameSamples);
 
 std::vector<Bytes> packetizeFrame(
     AudioCodec codec,

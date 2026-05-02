@@ -19,10 +19,11 @@ WaveBridge currently implements the PC-side sender:
 - PCM normalization to 48 kHz stereo S16LE.
 - Low-latency frame splitting and UDP packetization.
 - Optional Opus encoding through runtime-loaded `opus.dll` / `libopus.dll`.
+- Start, Stop, Ping, and Pong control packets for receiver state and keepalive checks.
 - A local `mock-phone` mode for testing discovery and packet flow without a phone.
 - Built-in `self-test` coverage for CLI parsing, discovery JSON, packet serialization, frame splitting, and PCM conversion.
 
-The Android phone-side receiver is implemented separately in [WaveBridge-Android](https://github.com/Markussiin/WaveBridge-Android). PCM streaming works end to end; Opus support on Android is still planned.
+The Android phone-side receiver is implemented separately in [WaveBridge-Android](https://github.com/Markussiin/WaveBridge-Android). PCM streaming works end to end; Android Opus decoding is experimental and depends on device `MediaCodec` support.
 
 ## How It Works
 
@@ -128,6 +129,8 @@ Audio uses a manually serialized binary UDP packet header. The current magic is 
 - sample rate, channel count, and frame size
 - chunk index/count for payloads split across UDP datagrams
 
+The sender emits `Start` before capture, sends periodic `Ping` packets while streaming, accepts receiver `Pong` replies on the sender UDP socket, and emits `Stop` during clean shutdown.
+
 The default network audio format is 48 kHz stereo S16LE. The default frame size is 5 ms, and packet payloads are kept near MTU size by default.
 
 ## Project Layout
@@ -148,10 +151,8 @@ WaveBridge/
 
 ## Roadmap
 
-- Add Android Opus decoding.
-- Improve receiver-side jitter buffering and clock drift handling.
+- Tune Android jitter buffering and drift correction from real-world testing.
 - Add device picker support for non-default Windows output devices.
-- Add start/stop/ping/pong control packets to the runtime flow.
 - Add CI once the project layout settles.
 - Consider simple pairing for shared networks.
 

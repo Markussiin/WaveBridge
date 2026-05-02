@@ -149,6 +149,30 @@ int runMockPhone(const AppConfig& config)
                         std::cerr << "Invalid audio packet from " << endpointToString(from) << "\n";
                     }
                 } else {
+                    if (packet.header.packetType == PacketType::Ping) {
+                        const auto pong = makeControlPacket(
+                            PacketType::Pong,
+                            packet.header.codec,
+                            packet.header.streamId,
+                            packet.header.sequence,
+                            packet.header.frameSamples);
+                        sendto(
+                            audioSocket.get(),
+                            reinterpret_cast<const char*>(pong.data()),
+                            static_cast<int>(pong.size()),
+                            0,
+                            reinterpret_cast<const sockaddr*>(&from),
+                            sizeof(from));
+                        continue;
+                    }
+                    if (packet.header.packetType != PacketType::Audio) {
+                        if (config.debug) {
+                            std::cout << "Control packet type=" << static_cast<int>(packet.header.packetType)
+                                << " seq=" << packet.header.sequence << "\n";
+                        }
+                        continue;
+                    }
+
                     ++packetCount;
                     byteCount += static_cast<std::uint64_t>(received);
 
