@@ -4,7 +4,11 @@ WaveBridge is an experimental Windows audio bridge that streams your PC's system
 
 The project started as a small personal itch: sometimes I had working headphones connected to my phone, but nothing useful for my PC. Rather than move hardware around or buy another adapter, I wanted a lightweight way to hear PC audio through the phone I already had next to me. WaveBridge is that idea turned into a C++ project.
 
-This is a for-fun project, but it is being built like a real tool: clear protocol boundaries, testable sender behavior, and a simple path toward a phone receiver later.
+This is a for-fun project, but it is being built like a real tool: clear protocol boundaries, testable sender behavior, and a simple path between the PC sender and phone receiver.
+
+The matching Android receiver lives here:
+
+https://github.com/Markussiin/WaveBridge-Android
 
 ## Status
 
@@ -15,10 +19,10 @@ WaveBridge currently implements the PC-side sender:
 - PCM normalization to 48 kHz stereo S16LE.
 - Low-latency frame splitting and UDP packetization.
 - Optional Opus encoding through runtime-loaded `opus.dll` / `libopus.dll`.
-- A local `mock-phone` mode for testing discovery and packet flow before the real phone app exists.
+- A local `mock-phone` mode for testing discovery and packet flow without a phone.
 - Built-in `self-test` coverage for CLI parsing, discovery JSON, packet serialization, frame splitting, and PCM conversion.
 
-The phone-side receiver is planned but not implemented yet.
+The Android phone-side receiver is implemented separately in [WaveBridge-Android](https://github.com/Markussiin/WaveBridge-Android). PCM streaming works end to end; Opus support on Android is still planned.
 
 ## How It Works
 
@@ -70,7 +74,17 @@ Run the built-in tests:
 
 ## Usage
 
-Start a mock receiver in one terminal:
+For real phone playback, install and start the Android receiver:
+
+https://github.com/Markussiin/WaveBridge-Android
+
+Then start the Windows sender:
+
+```powershell
+.\x64\Release\WaveBridge.exe send --codec pcm --debug
+```
+
+For PC-only validation, start a mock receiver in one terminal:
 
 ```powershell
 .\x64\Release\WaveBridge.exe mock-phone --debug
@@ -134,8 +148,8 @@ WaveBridge/
 
 ## Roadmap
 
-- Build the phone-side receiver.
-- Add receiver-side jitter buffering and clock drift handling.
+- Add Android Opus decoding.
+- Improve receiver-side jitter buffering and clock drift handling.
 - Add device picker support for non-default Windows output devices.
 - Add start/stop/ping/pong control packets to the runtime flow.
 - Add CI once the project layout settles.
