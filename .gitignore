@@ -1,0 +1,32 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.VC.opendb
+ipch/
+
+# Build outputs
+x64/
+x86/
+Win32/
+Debug/
+Release/
+bin/
+obj/
+*.ilk
+*.pdb
+*.idb
+*.iobj
+*.ipdb
+*.log
+*.tlog/
+
+# vcpkg manifest installs
+vcpkg_installed/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.tmp
